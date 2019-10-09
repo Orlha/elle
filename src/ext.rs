@@ -14,20 +14,6 @@ pub struct Pos {
 	pub y: i64,
 }
 
-pub struct Char {
-	x: i64,
-	y: i64,
-}
-
-impl Char {
-	pub fn new() -> Char {
-		Char {x: 0, y: 0}
-	}
-	pub fn pos(&self) -> Pos {
-		Pos {x: self.x, y: self.y}
-	}
-}
-
 impl Pos {
 	pub fn new() -> Pos {
 		Pos{x: 0, y: 0}

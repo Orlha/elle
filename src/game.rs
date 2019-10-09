@@ -5,13 +5,23 @@ use crate::ext::*;
 
 pub struct Game {
 	map: Map,
+	char: Char,
 	x: i64,
 	y: i64,
 }
 
+pub enum Direction {
+	North,
+	East,
+	South,
+	West,
+}
+
 impl Game {
 	pub fn new(x: i64, y: i64) -> Game {
-		Game {map: Map::new(), x: x, y: y}
+		Game {map: Map::new(), char: Char::new(), x: x, y: y}
+	}
+	pub fn char_move(dir: Direction) {
 	}
 }
 

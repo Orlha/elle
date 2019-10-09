@@ -1,7 +1,10 @@
 use std::fmt;
 use crate::ext::*;
+use std::error::Error;
 
 const MAP_SIZE: usize = 4;
+
+static ERR_BOUNDS: &str = "Map: out of bounds";
 
 pub struct Map {
 	//
@@ -10,12 +13,22 @@ pub struct Map {
 }
 
 impl Map {
+	pub fn width(&self) -> i64 {
+		MAP_SIZE as i64
+	}
+	pub fn height(&self) -> i64 {
+		MAP_SIZE as i64
+	}
 	pub fn new() -> Map {
 		Map{data: Default::default(), pos: Pos::new()}
 	}
-	pub fn set_pos(&mut self, x: i64, y: i64) {
+	fn set_pos(&mut self, x: i64, y: i64) -> Result<()> {
+		if (x < 0) | (y < 0) | (x >= self.width()) | (y >= self.height()) {
+			return Err(ERR_BOUNDS.into());
+		}
 		self.pos.x = x;
 		self.pos.y = y;
+		Ok(())
 	}
 }
 
