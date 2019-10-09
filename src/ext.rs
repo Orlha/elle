@@ -9,6 +9,7 @@ use crate::game::*;
 
 pub type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
+#[derive(Copy, Clone)]
 pub struct Pos {
 	pub x: i64,
 	pub y: i64,
@@ -17,6 +18,12 @@ pub struct Pos {
 impl Pos {
 	pub fn new() -> Pos {
 		Pos{x: 0, y: 0}
+	}
+}
+
+impl fmt::Display for Pos {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "x: {}, y: {}", self.x, self.y)
 	}
 }
 
@@ -45,11 +52,6 @@ pub trait Ext: std::fmt::Display + std::fmt::Debug
 		return None;
 	}
 	*/
-}
-
-fn clear_screen() {
-	println!("{}", termion::clear::All);
-	//
 }
 
 pub fn trim_newline(s: &mut String) {

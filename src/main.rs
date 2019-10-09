@@ -6,12 +6,14 @@ mod ext;
 mod cmdr;
 mod game;
 mod map;
+mod char;
 
 use ext::*;
 use cmdr::*;
 use std::fmt;
 use std::io;
 use std::env;
+use std::io::{stdin, stdout, Write};
 
 fn run() -> Result<()> {
 	/*
@@ -22,9 +24,12 @@ fn run() -> Result<()> {
 	*/
 
 	let mut engine = Engine::new();
+	let _ = engine.req_cmd();
+	engine.clear_screen();
 	loop {
-		let s = read_string().unwrap();
-		engine.parse(&s);
+		let s = engine.req_cmd();
+		engine.clear_screen();
+		engine.parse(&s).ok();
 		engine.output();
 		if !engine.active() {
 			break;

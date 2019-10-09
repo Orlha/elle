@@ -1,14 +1,17 @@
-use crate::ext;
+use crate::ext::*;
 
 pub struct Char {
-	pub pos: Pos,
+	pos: Pos,
 }
 
 impl Char {
 	pub fn new() -> Char {
-		Char {x: 0, y: 0}
+		Char {pos: Pos::new()}
 	}
 	pub fn pos(&self) -> Pos {
-		Pos {x: self.x, y: self.y}
+		return self.pos;
+	}
+	pub fn set_pos(&mut self, pos: &Pos) {
+		self.pos = *pos;
 	}
 }
