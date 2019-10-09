@@ -4,55 +4,33 @@ use std::io::Read;
 use std::io;
 use std::error;
 
-const MAP_SIZE: usize = 4;
+use crate::game::*;
+
 
 pub type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
-pub struct Map {
-	//
-	data: [[u8; MAP_SIZE]; MAP_SIZE],
+pub struct Pos {
+	pub x: i64,
+	pub y: i64,
 }
 
-pub struct Game {
-	map: Map,
-	x: i32,
-	y: i32,
+pub struct Char {
+	x: i64,
+	y: i64,
 }
 
-impl Map {
-	pub fn new() -> Map {
-		Map{data: Default::default()}
+impl Char {
+	pub fn new() -> Char {
+		Char {x: 0, y: 0}
+	}
+	pub fn pos(&self) -> Pos {
+		Pos {x: self.x, y: self.y}
 	}
 }
 
-impl Game {
-	pub fn new(x: i32, y: i32) -> Game {
-		Game {map: Map::new(), x: x, y: y}
-	}
-}
-
-impl fmt::Display for Map {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		for x in 0..MAP_SIZE {
-			for y in 0..MAP_SIZE {
-				if y == 0 {
-					write!(f, "\t")?;
-				}
-				write!(f, "{} ", self.data[x][y])?;
-			}
-			if x < MAP_SIZE - 1 {
-				write!(f, "\n")?;
-			}
-		}
-		Ok(())
-	}
-}
-
-impl fmt::Display for Game {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(f, "x: {}, y: {}\n", self.x, self.y)?;
-		write!(f, "map:\n{}", self.map)?;
-		Ok(())
+impl Pos {
+	pub fn new() -> Pos {
+		Pos{x: 0, y: 0}
 	}
 }
 
