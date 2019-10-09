@@ -38,10 +38,13 @@ fn run() -> Result<()> {
 
 	loop {
 		let s = read_string().unwrap();
-		cmdr(s);
-		match s {
-			"Exit".to_string() => {
+		cmdr(&s);
+		match s.as_ref() {
+			"Exit" => {
 				break;
+			},
+			&_ => {
+				continue;
 			}
 		}
 	}
