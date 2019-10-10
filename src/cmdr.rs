@@ -30,7 +30,10 @@ impl Engine {
 	}
 	pub fn parse(&mut self, cmd: &String) -> Result<()> {
 		match cmd.as_ref() {
-			"Exit" | "Q" | "q" => self.on = false,
+			"exit" | "Q" | "q" => self.on = false,
+			"spawn" => {
+				self.game.spawn_cell()?;
+			}
 			/*
 			"W" | "w" => {
 				println!("Moving North;");

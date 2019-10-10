@@ -25,8 +25,8 @@ fn run() -> Result<()> {
 	*/
 
 	let mut engine = Engine::new();
-	engine.req_cmd();
-	engine.clear_screen();
+	//engine.req_cmd();
+	//engine.clear_screen();
 	loop {
 		let s = engine.req_cmd();
 		engine.clear_screen();

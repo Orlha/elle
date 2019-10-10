@@ -39,6 +39,11 @@ impl Game {
 			Err(_t) => (),
 		}
 	}
+	pub fn spawn_cell(&mut self) -> Result<()> {
+		self.cells.push(Cell::new());
+		println!("Cells: {}", self.cells.len());
+		Ok(())
+	}
 }
 
 impl fmt::Display for Game {
