@@ -7,6 +7,7 @@ mod cmdr;
 mod game;
 mod map;
 mod char;
+mod cell;
 
 use ext::*;
 use cmdr::*;
@@ -24,12 +25,14 @@ fn run() -> Result<()> {
 	*/
 
 	let mut engine = Engine::new();
-	let _ = engine.req_cmd();
+	engine.req_cmd();
 	engine.clear_screen();
 	loop {
 		let s = engine.req_cmd();
 		engine.clear_screen();
+		println!("Log:");
 		engine.parse(&s).ok();
+		engine.process();
 		engine.output();
 		if !engine.active() {
 			break;

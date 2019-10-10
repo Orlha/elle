@@ -25,9 +25,13 @@ impl Engine {
 		let s = read_string().unwrap();
 		return s;
 	}
+	pub fn process(&mut self) {
+		return;
+	}
 	pub fn parse(&mut self, cmd: &String) -> Result<()> {
 		match cmd.as_ref() {
 			"Exit" | "Q" | "q" => self.on = false,
+			/*
 			"W" | "w" => {
 				println!("Moving North;");
 				self.game.char_move(Direction::North);
@@ -44,12 +48,18 @@ impl Engine {
 				println!("Moving West;");
 				self.game.char_move(Direction::West);
 			}
+			*/
+			""        => {
+				println!("Forward 1 turn;");
+			}
 			&_ => return Err("Unknown command".into()),
 		}
 		Ok(())
 	}
 	pub fn output(&self) {
+		println!("------------------------");
 		println!("{}", self.game);
+		println!("------------------------");
 		return;
 	}
 	pub fn clear_screen(&self) {

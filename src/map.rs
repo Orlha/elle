@@ -38,13 +38,16 @@ impl fmt::Display for Map {
 				if x == 0 {
 					write!(f, "\t")?;
 				}
+				/*
 				if self.pos.x == x as i64 && self.pos.y == y as i64 {
 					write!(f, "{} ", 'V')?;
 					continue;
 				}
+				*/
 				match self.data[y][x] {
 					0 => write!(f, "{} ", '·')?,
-					_ => write!(f, "{} ", self.data[y][x])?,
+					_ => write!(f, "{} ", '▸')?,
+					//_ => write!(f, "{} ", self.data[y][x])?,
 				}
 			}
 			if y < MAP_SIZE - 1 {

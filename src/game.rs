@@ -3,12 +3,13 @@ use std::fmt;
 use crate::map::*;
 use crate::ext::*;
 use crate::char::*;
+use crate::cell::*;
 
 pub struct Game {
 	map: Map,
 	char: Char,
-	x: i64,
-	y: i64,
+	cells: Vec<Cell>,
+	pos: Pos,
 }
 
 pub enum Direction {
@@ -19,8 +20,8 @@ pub enum Direction {
 }
 
 impl Game {
-	pub fn new(x: i64, y: i64) -> Game {
-		Game {map: Map::new(), char: Char::new(), x: x, y: y}
+	pub fn new(_x: i64, _y: i64) -> Game {
+		Game {..Default::default()}
 	}
 	pub fn char_move(&mut self, dir: Direction) {
 		let mut pos = self.char.pos();
@@ -42,8 +43,13 @@ impl Game {
 
 impl fmt::Display for Game {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		writeln!(f, "pos: {}", self.char.pos())?;
-		write!(f, "map:\n{}", self.map)?;
+		write!(f, "{}", self.map)?;
 		Ok(())
+	}
+}
+
+impl Default for Game {
+	fn default() -> Game {
+		Game {map: Map::new(), char: Char::new(), pos: Pos::new(), cells: Vec::new() /*Default::default*/ }
 	}
 }
