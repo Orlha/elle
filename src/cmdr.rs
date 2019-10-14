@@ -61,6 +61,7 @@ impl Engine {
 			*/
 			""        => {
 				println!("Forward 1 turn;");
+				self.game.world_tick()?;
 			}
 			&_ => return Err("Unknown command".into()),
 		}

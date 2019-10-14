@@ -20,6 +20,7 @@ pub enum Direction {
 }
 
 
+
 impl Game {
 	pub fn new(_x: i64, _y: i64) -> Game {
 		Game {..Default::default()}
@@ -45,16 +46,50 @@ impl Game {
 		let r = self.map.bind_cell(id);
 		println!("{}", CMD_SIZE);
 		match r {
-			Ok((t)) => {
+			Ok(t) => {
 				self.cells.push(Cell::new(id, t));
 				println!("Created cell: {}", self.cells[self.cells.len() - 1]);
+				println!("Cells: {}", self.cells.len());
 				return Ok(());
 			}
-			Err(t) => {
+			Err(_t) => {
 				return Err("no space".into());
 			}
 		}
-		println!("Cells: {}", self.cells.len());
+	}
+	fn cell_tick(map: &mut Map, cell: &mut Cell, cmd: u8) {
+		match cmd {
+			0 => {
+				let r = map.move_cell(cell.get_pos(), Action::MoveNorth).unwrap();
+				cell.set_pos(r).unwrap();
+			}
+			1 => {
+				let r =map.move_cell(cell.get_pos(), Action::MoveEast).unwrap();
+				cell.set_pos(r).unwrap();
+			}
+			2 => {
+				let r =map.move_cell(cell.get_pos(), Action::MoveSouth).unwrap();
+				cell.set_pos(r).unwrap();
+			}
+			3 => {
+				let r = map.move_cell(cell.get_pos(), Action::MoveWest).unwrap();
+				cell.set_pos(r).unwrap();
+			}
+			_ => {
+				
+			}
+		}
+		//let x = cell.get_pos();
+		//map.move_cell(cell.get_pos(), Action::MoveNorth);
+	}
+	pub fn world_tick(&mut self) -> Result <()> {
+		//let mut x = 0;
+		for cell in self.cells.iter_mut() {
+			//println!("Cell {} got cmd: {}", x, cell.get_cmd().unwrap());
+			//x += 1;
+			let cmd = cell.get_cmd().unwrap();
+			Game::cell_tick(&mut self.map, cell, cmd);
+		}
 		Ok(())
 	}
 }

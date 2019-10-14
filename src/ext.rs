@@ -8,6 +8,14 @@ use crate::game::*;
 
 
 pub type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+pub const 
+
+pub enum Action {
+	MoveNorth,
+	MoveEast,
+	MoveSouth,
+	MoveWest,
+}
 
 #[derive(Copy, Clone)]
 pub struct Pos {

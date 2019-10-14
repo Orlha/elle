@@ -38,7 +38,7 @@ impl Map {
 			println!("{} {}", yc, xc);
 			return Ok(Pos::init(xc as i64, yc as i64));
 		}
-		for x in 0..10 {
+		for _x in 0..10 {
 			let xr = (get_rand(1).unwrap()[0] % MAP_SIZE as u8) as usize;
 			let yr = (get_rand(1).unwrap()[0] % MAP_SIZE as u8) as usize;
 			println!("{} {}", yr, xr);
@@ -49,6 +49,44 @@ impl Map {
 			}
 		}
 		Err("Map: couldn't spawn after 10 attempts".into())
+	}
+	pub fn check_borders(&self, pos: Pos) -> Result<()> {
+		let x = pos.x;
+		let y = pos.y;
+		if (x < 0) | (y < 0) | (x >= self.width()) | (y >= self.height()) {
+			Err(ERR_BOUNDS.into())
+		} else {
+			Ok(())
+		}
+	}
+	pub fn check_spot(&self, pos: Pos) -> Result<()> {
+		if self.data[pos.y as usize][pos.x as usize] == 0 {
+			Ok(())
+		} else {
+			Err("Spot is taken by another cell".into())
+		}
+	}
+	pub fn move_cell(&mut self, pos: Pos, action: Action,) -> Result<Pos> {
+		let mut npos: Pos = pos;
+		match action {
+			Action::MoveNorth => npos.y -= 1,
+			Action::MoveEast  => npos.x += 1,
+			Action::MoveSouth => npos.y += 1,
+			Action::MoveWest  => npos.x -= 1,
+			                _ => return Err("Invalid action for [movement]".into()),
+		}
+		let r = self.check_borders(npos);
+		match r {
+			Ok(_t) => (),
+			Err(_t) => return Ok(pos),
+		}
+		if self.data[npos.y as usize][npos.x as usize] == 0 {
+			self.data[npos.y as usize][npos.x as usize] = self.data[pos.y as usize][pos.x as usize];
+			self.data[pos.y as usize][pos.x as usize] = 0;
+			Ok(npos)
+		} else {
+			Ok(pos)
+		}
 	}
 }
 

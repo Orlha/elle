@@ -4,34 +4,26 @@ use std::fmt::Formatter;
 
 use crate::ext::*;
 
-pub enum Action {
-	MoveNorth,
-	MoveEast,
-	MoveSouth,
-	MoveWest,
-}
-
 const TAPE_SIZE: usize = 32;
 pub const CMD_SIZE: usize = 4;
 
 pub struct Cell {
 	id: u8,
 	pos: Pos,
-	//tape: Vec<Action>,
-	//tape: [u8; TAPE_SIZE],
 	tape: [u8; TAPE_SIZE],
+	hand: usize,
 }
 
 impl Default for Cell {
 	fn default() -> Cell {
-		Cell{id: 0, pos: Pos::new(), tape: Default::default()}
+		Cell{id: 0, pos: Pos::new(), hand: 0, tape: Default::default()}
 	}
 }
 
 impl Display for Cell {
 	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-		writeln!(f, "Cell: {}", self.id);
-		writeln!(f, "Pos: {} {}", self.pos.x, self.pos.y);
+		writeln!(f, "Cell: {}", self.id)?;
+		writeln!(f, "Pos: {} {}", self.pos.x, self.pos.y)?;
 		write!(f, "Tape: {:02X?}", self.tape)
 	}
 }
@@ -50,5 +42,16 @@ impl Cell {
 	pub fn set_pos(&mut self, pos: Pos) -> Result<()> {
 		self.pos = pos;
 		Ok(())
+	}
+	pub fn get_pos(&self) -> Pos {
+		Pos{x: self.pos.x, y: self.pos.y}
+	}
+	pub fn get_cmd(&mut self) -> Result<u8> {
+		let r = self.tape[self.hand];
+		self.hand += 1;
+		if self.hand == TAPE_SIZE {
+			self.hand = 0;
+		}
+		Ok(r)
 	}
 }
