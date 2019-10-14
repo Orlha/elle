@@ -8,7 +8,8 @@ use crate::game::*;
 
 
 pub type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
-pub const 
+pub const ENERGY_TOP: i64 = 10;
+pub const ENERGY_DROP: i64 = 1;
 
 pub enum Action {
 	MoveNorth,

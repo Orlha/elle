@@ -10,6 +10,7 @@ pub struct Game {
 	char: Char,
 	cells: Vec<Cell>,
 	pos: Pos,
+	turn: i64,
 }
 
 pub enum Direction {
@@ -44,12 +45,11 @@ impl Game {
 	pub fn spawn_cell(&mut self) -> Result<()> {
 		let id = (self.cells.len() + 1) as u8;
 		let r = self.map.bind_cell(id);
-		println!("{}", CMD_SIZE);
 		match r {
 			Ok(t) => {
 				self.cells.push(Cell::new(id, t));
-				println!("Created cell: {}", self.cells[self.cells.len() - 1]);
-				println!("Cells: {}", self.cells.len());
+				println!("Created cell:\n{}", self.cells[self.cells.len() - 1]);
+				println!("Total cells: {}", self.cells.len());
 				return Ok(());
 			}
 			Err(_t) => {
@@ -79,23 +79,29 @@ impl Game {
 				
 			}
 		}
-		//let x = cell.get_pos();
-		//map.move_cell(cell.get_pos(), Action::MoveNorth);
 	}
 	pub fn world_tick(&mut self) -> Result <()> {
-		//let mut x = 0;
+		let mut x = 0;
 		for cell in self.cells.iter_mut() {
-			//println!("Cell {} got cmd: {}", x, cell.get_cmd().unwrap());
-			//x += 1;
-			let cmd = cell.get_cmd().unwrap();
-			Game::cell_tick(&mut self.map, cell, cmd);
+			x += 1;
+			if cell.alive() {
+				let mut x = ENERGY_TOP - ENERGY_DROP * cell.get_pos().y;
+				if x < 0 { x = 0; }
+				cell.gain_energy(x);
+				let cmd = cell.get_cmd().unwrap();
+				Game::cell_tick(&mut self.map, cell, cmd);
+				cell.gain_energy(-1);
+			}
 		}
+		println!("Processed {} cells;", x);
+		self.turn += 1;
 		Ok(())
 	}
 }
 
 impl fmt::Display for Game {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		writeln!(f, "Turn: {}", self.turn)?;
 		write!(f, "{}", self.map)?;
 		Ok(())
 	}
@@ -103,6 +109,12 @@ impl fmt::Display for Game {
 
 impl Default for Game {
 	fn default() -> Game {
-		Game {map: Map::new(), char: Char::new(), pos: Pos::new(), cells: Vec::new() /*Default::default*/ }
+		Game {
+			turn: 0,
+			map: Map::new(),
+			char: Char::new(),
+			pos: Pos::new(),
+			cells: Vec::new()
+		}
 	}
 }

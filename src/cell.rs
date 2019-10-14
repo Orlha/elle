@@ -12,19 +12,21 @@ pub struct Cell {
 	pos: Pos,
 	tape: [u8; TAPE_SIZE],
 	hand: usize,
+	energy: i64,
+	alive: bool,
 }
 
 impl Default for Cell {
 	fn default() -> Cell {
-		Cell{id: 0, pos: Pos::new(), hand: 0, tape: Default::default()}
+		Cell{alive: true, energy: 50, id: 0, pos: Pos::new(), hand: 0, tape: Default::default()}
 	}
 }
 
 impl Display for Cell {
 	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-		writeln!(f, "Cell: {}", self.id)?;
-		writeln!(f, "Pos: {} {}", self.pos.x, self.pos.y)?;
-		write!(f, "Tape: {:02X?}", self.tape)
+		writeln!(f, "  id: {}", self.id)?;
+		writeln!(f, " pos: {} {}", self.pos.x, self.pos.y)?;
+		write!  (f, "tape: {:02X?}", self.tape)
 	}
 }
 
@@ -53,5 +55,11 @@ impl Cell {
 			self.hand = 0;
 		}
 		Ok(r)
+	}
+	pub fn gain_energy(&mut self, n: i64) {
+		self.energy += n;
+	}
+	pub fn alive(&self) -> bool {
+		self.alive
 	}
 }

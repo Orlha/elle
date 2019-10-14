@@ -59,9 +59,15 @@ impl Engine {
 				self.game.char_move(Direction::West);
 			}
 			*/
-			""        => {
+			""   => {
 				println!("Forward 1 turn;");
 				self.game.world_tick()?;
+			}
+			"x" => {
+				println!("Forward 100 turns;");
+				for _x in 0..100 {
+					self.game.world_tick()?;
+				}
 			}
 			&_ => return Err("Unknown command".into()),
 		}
