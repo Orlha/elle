@@ -91,6 +91,7 @@ impl Game {
 				let cmd = cell.get_cmd().unwrap();
 				Game::cell_tick(&mut self.map, cell, cmd);
 				cell.gain_energy(-1);
+				println!("{}", cell);
 			}
 		}
 		println!("Processed {} cells;", x);

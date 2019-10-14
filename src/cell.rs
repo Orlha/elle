@@ -26,6 +26,7 @@ impl Display for Cell {
 	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
 		writeln!(f, "  id: {}", self.id)?;
 		writeln!(f, " pos: {} {}", self.pos.x, self.pos.y)?;
+		writeln!(f, " nrg: {}", self.energy)?;
 		write!  (f, "tape: {:02X?}", self.tape)
 	}
 }
@@ -57,7 +58,17 @@ impl Cell {
 		Ok(r)
 	}
 	pub fn gain_energy(&mut self, n: i64) {
-		self.energy += n;
+		let mut energy: &mut i64 = &mut self.energy;
+		if *energy == 0 { return; }
+		*energy += n;
+		if *energy < 0 {
+			*energy = 0;
+			return;
+		}
+		if *energy > 100 {
+			*energy = 100;
+			return;
+		}
 	}
 	pub fn alive(&self) -> bool {
 		self.alive
