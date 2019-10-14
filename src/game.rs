@@ -19,6 +19,7 @@ pub enum Direction {
 	West,
 }
 
+
 impl Game {
 	pub fn new(_x: i64, _y: i64) -> Game {
 		Game {..Default::default()}
@@ -40,7 +41,19 @@ impl Game {
 		}
 	}
 	pub fn spawn_cell(&mut self) -> Result<()> {
-		self.cells.push(Cell::new());
+		let id = (self.cells.len() + 1) as u8;
+		let r = self.map.bind_cell(id);
+		println!("{}", CMD_SIZE);
+		match r {
+			Ok((t)) => {
+				self.cells.push(Cell::new(id, t));
+				println!("Created cell: {}", self.cells[self.cells.len() - 1]);
+				return Ok(());
+			}
+			Err(t) => {
+				return Err("no space".into());
+			}
+		}
 		println!("Cells: {}", self.cells.len());
 		Ok(())
 	}

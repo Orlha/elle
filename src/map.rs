@@ -29,6 +29,27 @@ impl Map {
 		self.pos.y = y;
 		Ok(())
 	}
+	pub fn bind_cell(&mut self, id: u8) -> Result<(Pos)> {
+		println!("binding id {}", id);
+		let xc = MAP_SIZE / 2;
+		let yc = MAP_SIZE / 2;
+		if self.data[yc][xc] == 0 {
+			self.data[yc][xc] = id;
+			println!("{} {}", yc, xc);
+			return Ok(Pos::init(xc as i64, yc as i64));
+		}
+		for x in 0..10 {
+			let xr = (get_rand(1).unwrap()[0] % MAP_SIZE as u8) as usize;
+			let yr = (get_rand(1).unwrap()[0] % MAP_SIZE as u8) as usize;
+			println!("{} {}", yr, xr);
+			if self.data[yr][xr] == 0 {
+				self.data[yr][xr] = id;
+				println!("{} {}", yr, xr);
+				return Ok(Pos::init(xr as i64, yr as i64));
+			}
+		}
+		Err("Map: couldn't spawn after 10 attempts".into())
+	}
 }
 
 impl fmt::Display for Map {

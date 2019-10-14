@@ -10,11 +10,18 @@ use crate::game::*;
 pub struct Engine {
 	game: Game,
 	on: bool,
+	last: String,
+}
+
+impl Default for Engine {
+	fn default() -> Engine {
+		Engine{game: Game::new(1, 2), on: true, last: "".into()}
+	}
 }
 
 impl Engine {
 	pub fn new() -> Engine {
-		Engine{game: Game::new(1, 2), on: true}
+		Engine{game: Game::new(1, 2), on: true, ..Default::default()}
 	}
 	pub fn active(&self) -> bool {
 		return self.on;
@@ -30,8 +37,8 @@ impl Engine {
 	}
 	pub fn parse(&mut self, cmd: &String) -> Result<()> {
 		match cmd.as_ref() {
-			"exit" | "Q" | "q" => self.on = false,
-			"spawn" => {
+			"exit"  | "Q" | "q" => self.on = false,
+			"spawn" | "S" | "s" => {
 				self.game.spawn_cell()?;
 			}
 			/*

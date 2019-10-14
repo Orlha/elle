@@ -19,6 +19,9 @@ impl Pos {
 	pub fn new() -> Pos {
 		Pos{x: 0, y: 0}
 	}
+	pub fn init(x: i64, y: i64) -> Pos {
+		Pos{x: x, y: y}
+	}
 }
 
 impl fmt::Display for Pos {
