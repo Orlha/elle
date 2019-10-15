@@ -1,13 +1,14 @@
 use std::fmt;
 use crate::ext::*;
 use std::error::Error;
+use std::mem;
 
 const MAP_SIZE: usize = 20;
 
 static ERR_BOUNDS: &str = "Map: out of bounds";
 
 pub struct Map {
-	data: [[u8; MAP_SIZE]; MAP_SIZE],
+	data: [[i32; MAP_SIZE]; MAP_SIZE],
 	pos: Pos,
 }
 
@@ -29,7 +30,7 @@ impl Map {
 		self.pos.y = y;
 		Ok(())
 	}
-	pub fn bind_cell(&mut self, id: u8) -> Result<(Pos)> {
+	pub fn bind_cell(&mut self, id: i32) -> Result<(Pos)> {
 		let xc = MAP_SIZE / 2;
 		let yc = MAP_SIZE / 2;
 		if self.data[yc][xc] == 0 {
@@ -45,6 +46,13 @@ impl Map {
 			}
 		}
 		Err("Map: couldn't spawn after 10 attempts".into())
+	}
+	pub fn kill_cell(&mut self, pos: Pos) -> Result<()> {
+		let n = &mut self.data[pos.y as usize][pos.x as usize];
+		if *n > 0 {
+			*n *= -1;
+		}
+		Ok(())
 	}
 	pub fn check_borders(&self, pos: Pos) -> Result<()> {
 		let x = pos.x;
@@ -62,20 +70,38 @@ impl Map {
 			Err("Spot is taken by another cell".into())
 		}
 	}
-	pub fn move_cell(&mut self, pos: Pos, action: Action,) -> Result<Pos> {
+	pub fn move_cell(&mut self, pos: Pos, dir: Direction) -> Result<Pos> {
 		let mut npos: Pos = pos;
-		match action {
-			Action::MoveNorth => npos.y -= 1,
-			Action::MoveEast  => npos.x += 1,
-			Action::MoveSouth => npos.y += 1,
-			Action::MoveWest  => npos.x -= 1,
-			                _ => return Err("Invalid action for [movement]".into()),
+		match dir {
+			Direction::North => npos.y -= 1,
+			Direction::East  => npos.x += 1,
+			Direction::South => npos.y += 1,
+			Direction::West  => npos.x -= 1,
 		}
 		let r = self.check_borders(npos);
 		match r {
 			Ok(_t) => (),
 			Err(_t) => return Ok(pos),
 		}
+		match self.check_spot(npos) {
+			Ok(_t)  => {
+				match npos.y {
+					d if d >  pos.y => println!("smth"),
+					d if d <  pos.y => println!("smth"),
+					d if d == pos.y => println!("smth"),
+					_ => (),
+				}
+				/*
+				let (x, y) = self.data.split_at_mut(npos.y as usize);
+				mem::swap(&mut x[pos.y as usize][pos.x as usize], &mut y[0][npos.x as usize]);
+				*/
+				Ok(npos)
+			}
+			Err(_t) => Ok(pos),
+		}
+		/*
+		println!(" pos {}", pos);
+		println!("npos {}", npos);
 		if self.data[npos.y as usize][npos.x as usize] == 0 {
 			self.data[npos.y as usize][npos.x as usize] = self.data[pos.y as usize][pos.x as usize];
 			self.data[pos.y as usize][pos.x as usize] = 0;
@@ -83,6 +109,7 @@ impl Map {
 		} else {
 			Ok(pos)
 		}
+		*/
 	}
 }
 
@@ -100,8 +127,10 @@ impl fmt::Display for Map {
 				}
 				*/
 				match self.data[y][x] {
-					0 => write!(f, "{} ", '·')?,
-					_ => write!(f, "{} ", '▸')?,
+					0  => write!(f, "{} ", '·')?,
+					d if d < 0 => write!(f, "{} ", 'x')?,
+					d if d > 0 => write!(f, "{} ", '▸')?,
+					_  => write!(f, "{} ", '▸')?,
 					//_ => write!(f, "{} ", self.data[y][x])?,
 				}
 			}

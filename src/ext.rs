@@ -6,16 +6,23 @@ use std::error;
 
 use crate::game::*;
 
-
 pub type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 pub const ENERGY_TOP: i64 = 10;
 pub const ENERGY_DROP: i64 = 1;
+pub const CMD_SIZE: usize = 3;
+pub const DIR_SIZE: usize = 4;
 
 pub enum Action {
-	MoveNorth,
-	MoveEast,
-	MoveSouth,
-	MoveWest,
+	Move,
+	Feast,
+	Nothing,
+}
+
+pub enum Direction {
+	North,
+	East,
+	South,
+	West,
 }
 
 #[derive(Copy, Clone)]

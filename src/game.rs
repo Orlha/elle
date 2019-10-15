@@ -13,15 +13,6 @@ pub struct Game {
 	turn: i64,
 }
 
-pub enum Direction {
-	North,
-	East,
-	South,
-	West,
-}
-
-
-
 impl Game {
 	pub fn new(_x: i64, _y: i64) -> Game {
 		Game {..Default::default()}
@@ -43,7 +34,7 @@ impl Game {
 		}
 	}
 	pub fn spawn_cell(&mut self) -> Result<()> {
-		let id = (self.cells.len() + 1) as u8;
+		let id = (self.cells.len() + 1) as i32;
 		let r = self.map.bind_cell(id);
 		match r {
 			Ok(t) => {
@@ -57,27 +48,13 @@ impl Game {
 			}
 		}
 	}
-	fn cell_tick(map: &mut Map, cell: &mut Cell, cmd: u8) {
-		match cmd {
-			0 => {
-				let r = map.move_cell(cell.get_pos(), Action::MoveNorth).unwrap();
-				cell.set_pos(r).unwrap();
-			}
-			1 => {
-				let r =map.move_cell(cell.get_pos(), Action::MoveEast).unwrap();
-				cell.set_pos(r).unwrap();
-			}
-			2 => {
-				let r =map.move_cell(cell.get_pos(), Action::MoveSouth).unwrap();
-				cell.set_pos(r).unwrap();
-			}
-			3 => {
-				let r = map.move_cell(cell.get_pos(), Action::MoveWest).unwrap();
-				cell.set_pos(r).unwrap();
-			}
-			_ => {
-				
-			}
+	pub fn get_direction(dir: u8) -> Result<Direction> {
+		match dir {
+			0 => Ok(Direction::North),
+			1 => Ok(Direction::East),
+			2 => Ok(Direction::South),
+			3 => Ok(Direction::West),
+			_ => Err("Invalid direction;".into()),
 		}
 	}
 	pub fn world_tick(&mut self) -> Result <()> {
@@ -88,10 +65,26 @@ impl Game {
 				let mut x = ENERGY_TOP - ENERGY_DROP * cell.get_pos().y;
 				if x < 0 { x = 0; }
 				cell.gain_energy(x);
-				let cmd = cell.get_cmd().unwrap();
-				Game::cell_tick(&mut self.map, cell, cmd);
-				cell.gain_energy(-1);
-				println!("{}", cell);
+				let cmd = cell.get_cmd().unwrap() % CMD_SIZE as u8;
+
+				match cmd {
+					0 => {
+						let cmd = cell.get_cmd().unwrap() % DIR_SIZE as u8;
+						let dir = Game::get_direction(cmd).unwrap();
+						let r = self.map.move_cell(cell.get_pos(), dir).unwrap();
+						cell.set_pos(r).unwrap();
+						cell.gain_energy(-1);
+						println!("Move");
+					}
+					1 => println!("Feast"),
+					2 => println!("Nothing"),
+					_ => return Err("Invalid command;".into()),
+				}
+				// println!("{}", cell);
+			} else {
+				self.map.kill_cell(cell.get_pos())?;
+				let r = self.map.move_cell(cell.get_pos(), Direction::South).unwrap();
+				cell.set_pos(r).unwrap();
 			}
 		}
 		println!("Processed {} cells;", x);

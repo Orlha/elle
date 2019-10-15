@@ -5,10 +5,9 @@ use std::fmt::Formatter;
 use crate::ext::*;
 
 const TAPE_SIZE: usize = 32;
-pub const CMD_SIZE: usize = 4;
 
 pub struct Cell {
-	id: u8,
+	id: i32,
 	pos: Pos,
 	tape: [u8; TAPE_SIZE],
 	hand: usize,
@@ -27,18 +26,20 @@ impl Display for Cell {
 		writeln!(f, "  id: {}", self.id)?;
 		writeln!(f, " pos: {} {}", self.pos.x, self.pos.y)?;
 		writeln!(f, " nrg: {}", self.energy)?;
-		write!  (f, "tape: {:02X?}", self.tape)
+		//write!  (f, "tape: {:02X?}", self.tape)
+		write!(f, "lives: {}", self.alive)
 	}
 }
 
 impl Cell {
-	pub fn new(id: u8, pos: Pos) -> Cell {
+	pub fn new(id: i32, pos: Pos) -> Cell {
 		let mut c = Cell{..Default::default()};
 		c.id = id;
 		c.pos = pos;
 		let rnd = get_rand(TAPE_SIZE).unwrap();
 		for i in 0..TAPE_SIZE {
-			c.tape[i] = rnd[i] % CMD_SIZE as u8;
+			// c.tape[i] = rnd[i] % CMD_SIZE as u8;
+			c.tape[i] = rnd[i];
 		}
 		return c;
 	}
@@ -59,9 +60,10 @@ impl Cell {
 	}
 	pub fn gain_energy(&mut self, n: i64) {
 		let mut energy: &mut i64 = &mut self.energy;
-		if *energy == 0 { return; }
+		if *energy == 0 { self.alive = false; return; }
 		*energy += n;
 		if *energy < 0 {
+			self.alive = false;
 			*energy = 0;
 			return;
 		}
