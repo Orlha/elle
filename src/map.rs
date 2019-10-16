@@ -1,5 +1,6 @@
 use std::fmt;
 use crate::ext::*;
+use crate::cell::*;
 use std::error::Error;
 use std::mem;
 
@@ -55,22 +56,31 @@ impl Map {
 		Ok(())
 	}
 	pub fn check_borders(&self, pos: Pos) -> Result<()> {
-		let x = pos.x;
 		let y = pos.y;
-		if (x < 0) | (y < 0) | (x >= self.width()) | (y >= self.height()) {
+		println!("y = {}", y);
+		if (y < 0) | (y >= self.height()) {
+			println!("got bad borders");
 			Err(ERR_BOUNDS.into())
 		} else {
+			println!("got good borders");
 			Ok(())
 		}
 	}
-	pub fn check_spot(&self, pos: Pos) -> Result<()> {
-		if self.data[pos.y as usize][pos.x as usize] == 0 {
-			Ok(())
-		} else {
-			Err("Spot is taken by another cell".into())
+	pub fn get_spot_status(&self, pos: Pos) -> Result<Spot> {
+		let r = self.check_borders(pos);
+		match r {
+			Ok(_) => (),
+			Err(_) => return Ok(Spot::Invalid),
+		}
+		let x = self.data[pos.y as usize][pos.x as usize];
+		match x {
+			0 => Ok(Spot::Empty),
+			d if d > 0 => Ok(Spot::Alive),
+			d if d < 0 => Ok(Spot::Dead),
+			_ => Err("Invalid spot value;".into()),
 		}
 	}
-	pub fn move_cell(&mut self, pos: Pos, dir: Direction) -> Result<Pos> {
+	pub fn cell_move(&mut self, id: i32, pos: Pos, dir: Direction) -> Result<Pos> {
 		let mut npos: Pos = pos;
 		match dir {
 			Direction::North => npos.y -= 1,
@@ -78,38 +88,105 @@ impl Map {
 			Direction::South => npos.y += 1,
 			Direction::West  => npos.x -= 1,
 		}
-		let r = self.check_borders(npos);
-		match r {
-			Ok(_t) => (),
-			Err(_t) => return Ok(pos),
+		match self.check_borders(npos) {
+			Ok(_) => (),
+			Err(_) => return Ok(pos),
 		}
-		match self.check_spot(npos) {
-			Ok(_t)  => {
-				match npos.y {
-					d if d >  pos.y => println!("smth"),
-					d if d <  pos.y => println!("smth"),
-					d if d == pos.y => println!("smth"),
-					_ => (),
-				}
-				/*
-				let (x, y) = self.data.split_at_mut(npos.y as usize);
-				mem::swap(&mut x[pos.y as usize][pos.x as usize], &mut y[0][npos.x as usize]);
-				*/
+
+		match npos.x {
+			d if d < 0 => npos.x = MAP_SIZE as i64 - 1,
+			d if d == MAP_SIZE as i64 => npos.x = 0,
+			_ => (),
+		}
+
+		println!("will crash right now");
+		println!("npos {}", npos);
+		match self.check_spot_status(npos, Spot::Empty) {
+			Ok(_) => {
+				self.data[pos.y as usize][pos.x as usize] = 0;
+				self.data[npos.y as usize][npos.x as usize] = id;
 				Ok(npos)
 			}
-			Err(_t) => Ok(pos),
+			_ => Ok(pos),
 		}
+	}
+	fn check_spot_status(&mut self, pos: Pos, spot: Spot) -> Result<()> {
 		/*
-		println!(" pos {}", pos);
-		println!("npos {}", npos);
-		if self.data[npos.y as usize][npos.x as usize] == 0 {
-			self.data[npos.y as usize][npos.x as usize] = self.data[pos.y as usize][pos.x as usize];
-			self.data[pos.y as usize][pos.x as usize] = 0;
-			Ok(npos)
-		} else {
-			Ok(pos)
+		match self.get_spot_status(pos).unwrap() {
+			spot => {
+				println!("{:?}", self.get_spot_status(pos).unwrap());
+				Ok(())
+			}
+			_ => Err("No valid status on questioned spot;".into()),
 		}
 		*/
+		let n = self.get_spot_status(pos).unwrap();
+		println!("spot status: {:?}", n);
+		println!("expc status: {:?}", spot);
+		if n == spot {
+			println!("Matched!");
+			return Ok(());
+		} else {
+			return Err("Err".into());
+		}
+	}
+	pub fn cell_cell(&self, cell: &mut Cell) {
+	}
+	pub fn cell_feast(&mut self, id: i32, pos: Pos) -> Result<i32> {
+		let mut x: Vec<Pos> = vec!{};
+		let pos_north = Pos::init(pos.x, pos.y - 1);
+		let mut pos_east  = Pos::init(pos.x + 1, pos.y);
+		let pos_south = Pos::init(pos.x, pos.y + 1);
+		let mut pos_west  = Pos::init(pos.x - 1, pos.y);
+
+		if pos_east.x == MAP_SIZE as i64 {
+			pos_east.x = 0;
+		}
+		if pos_west.x == -1 {
+			pos_west.x = MAP_SIZE as i64 - 1;
+		}
+
+		match self.check_spot_status(pos_north, Spot::Alive) {
+			Ok(_) => {
+				x.push(pos_north);
+				println!("added north");
+			}
+			_ => (),
+		}
+		match self.check_spot_status(pos_east, Spot::Alive) {
+			Ok(_) => {
+				x.push(pos_east);
+				println!("added east");
+			}
+			_ => (),
+		}
+		match self.check_spot_status(pos_south, Spot::Alive) {
+			Ok(_) => {
+				x.push(pos_south);
+				println!("added south");
+			}
+			_ => (),
+		}
+		match self.check_spot_status(pos_west, Spot::Alive) {
+			Ok(_) => {
+				x.push(pos_west);
+				println!("added west");
+			}
+			_ => (),
+		}
+		if x.len() == 0 {
+			return Ok(0);
+		}
+		println!("cell {} is trying to feast in one of {} directions", id, x.len());
+		let r = get_rand(1).unwrap()[0]  as usize % x.len();
+		println!("crashing pos {}", x[r]);
+		let n = self.data[x[r].y as usize][x[r].x as usize];
+		println!("cell {} is dead", n);
+		self.data[x[r].y as usize][x[r].x as usize] = 0;
+		Ok(n)
+	}
+	pub fn cell_scavenge(&mut self, id: i32, pos: Pos) -> Result<i32> {
+		Ok(5)
 	}
 }
 

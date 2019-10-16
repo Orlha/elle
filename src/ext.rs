@@ -9,12 +9,13 @@ use crate::game::*;
 pub type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 pub const ENERGY_TOP: i64 = 10;
 pub const ENERGY_DROP: i64 = 1;
-pub const CMD_SIZE: usize = 3;
+pub const CMD_SIZE: usize = 4;
 pub const DIR_SIZE: usize = 4;
 
 pub enum Action {
 	Move,
 	Feast,
+	Scavenge,
 	Nothing,
 }
 
@@ -23,6 +24,15 @@ pub enum Direction {
 	East,
 	South,
 	West,
+}
+
+#[derive(Debug)]
+#[derive(PartialEq)]
+pub enum Spot {
+	Empty,
+	Alive,
+	Dead,
+	Invalid,
 }
 
 #[derive(Copy, Clone)]

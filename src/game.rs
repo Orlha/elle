@@ -1,4 +1,5 @@
 use std::fmt;
+use std::collections::HashSet;
 
 use crate::map::*;
 use crate::ext::*;
@@ -59,36 +60,70 @@ impl Game {
 	}
 	pub fn world_tick(&mut self) -> Result <()> {
 		let mut x = 0;
+		let mut deads: HashSet<i32> = HashSet::new();
+		println!("{:?}", deads);
 		for cell in self.cells.iter_mut() {
+			println!("calculation cell");
+			if deads.contains(&cell.get_id()) {
+				continue;
+			}
 			x += 1;
 			if cell.alive() {
 				let mut x = ENERGY_TOP - ENERGY_DROP * cell.get_pos().y;
 				if x < 0 { x = 0; }
 				cell.gain_energy(x);
-				let cmd = cell.get_cmd().unwrap() % CMD_SIZE as u8;
+				let mut cmd = cell.get_cmd().unwrap() % CMD_SIZE as u8;
 
+				//cmd = 1;
 				match cmd {
 					0 => {
+						println!("Move");
 						let cmd = cell.get_cmd().unwrap() % DIR_SIZE as u8;
 						let dir = Game::get_direction(cmd).unwrap();
-						let r = self.map.move_cell(cell.get_pos(), dir).unwrap();
+						let r = self.map.cell_move(cell.get_id(), cell.get_pos(), dir).unwrap();
 						cell.set_pos(r).unwrap();
 						cell.gain_energy(-1);
-						println!("Move");
 					}
-					1 => println!("Feast"),
-					2 => println!("Nothing"),
+					1 => {
+						println!("Feast");
+						let r = self.map.cell_feast(cell.get_id(), cell.get_pos()).unwrap();
+						if r != 0 {
+							deads.insert(r);
+						}
+					}
+					2 => {
+						println!("Scavenge");
+					}
+					3 => println!("Nothing"),
 					_ => return Err("Invalid command;".into()),
 				}
 				// println!("{}", cell);
 			} else {
 				self.map.kill_cell(cell.get_pos())?;
-				let r = self.map.move_cell(cell.get_pos(), Direction::South).unwrap();
+				let r = self.map.cell_move(cell.get_id(), cell.get_pos(), Direction::South).unwrap();
 				cell.set_pos(r).unwrap();
 			}
 		}
 		println!("Processed {} cells;", x);
 		self.turn += 1;
+
+		//println!("deads: {:?}", deads);
+		let mut count_vec: Vec<(&i32)> = deads.iter().collect();
+		//println!("  vec: {:?}", count_vec);
+		count_vec.sort_by(|a, b| b.cmp(a));
+		//println!(" sort: {:?}", count_vec);
+		/*
+		for x in deads {
+			println!("removing cell with id {}", x - 1);
+			//self.cells.remove(x as usize - 1);
+		}
+		*/
+		println!("deads count: {}", deads.len());
+		println!("cells count: {}", self.cells.len());
+		for x in count_vec {
+			println!("removing id {}", *x);
+			self.cells.remove(*x as usize - 1);
+		}
 		Ok(())
 	}
 }

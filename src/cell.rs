@@ -50,6 +50,9 @@ impl Cell {
 	pub fn get_pos(&self) -> Pos {
 		Pos{x: self.pos.x, y: self.pos.y}
 	}
+	pub fn get_id(&self) -> i32 {
+		self.id
+	}
 	pub fn get_cmd(&mut self) -> Result<u8> {
 		let r = self.tape[self.hand];
 		self.hand += 1;
@@ -59,7 +62,7 @@ impl Cell {
 		Ok(r)
 	}
 	pub fn gain_energy(&mut self, n: i64) {
-		let mut energy: &mut i64 = &mut self.energy;
+		let energy: &mut i64 = &mut self.energy;
 		if *energy == 0 { self.alive = false; return; }
 		*energy += n;
 		if *energy < 0 {
