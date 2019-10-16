@@ -1,5 +1,6 @@
 use std::fmt;
 use std::collections::HashSet;
+use std::collections::HashMap;
 
 use crate::map::*;
 use crate::ext::*;
@@ -9,13 +10,16 @@ use crate::cell::*;
 pub struct Game {
 	map: Map,
 	char: Char,
-	cells: Vec<Cell>,
+	//cells: Vec<Cell>,
 	pos: Pos,
 	turn: i64,
+	cellsm: HashMap<i32, Cell>,
+	id_reuse: Vec<i32>,
 }
 
 impl Game {
 	pub fn new(_x: i64, _y: i64) -> Game {
+		//
 		Game {..Default::default()}
 	}
 	pub fn char_move(&mut self, dir: Direction) {
@@ -35,13 +39,21 @@ impl Game {
 		}
 	}
 	pub fn spawn_cell(&mut self) -> Result<()> {
-		let id = (self.cells.len() + 1) as i32;
+		//let id = (self.cells.len() + 1) as i32;
+		let id = if self.id_reuse.len() > 0 {
+			self.id_reuse.pop().unwrap()
+		} else {
+			self.cellsm.len() as i32
+		};
 		let r = self.map.bind_cell(id);
 		match r {
 			Ok(t) => {
+				self.cellsm.insert(id, Cell::new(id, t));
+				/*
 				self.cells.push(Cell::new(id, t));
-				println!("Created cell:\n{}", self.cells[self.cells.len() - 1]);
-				println!("Total cells: {}", self.cells.len());
+				*/
+				println!("Created cell:\n{}", self.cellsm[&(self.cellsm.len() as i32 - 1)]);
+				println!("Total cells: {}", self.cellsm.len());
 				return Ok(());
 			}
 			Err(_t) => {
@@ -62,7 +74,9 @@ impl Game {
 		let mut x = 0;
 		let mut deads: HashSet<i32> = HashSet::new();
 		println!("{:?}", deads);
-		for cell in self.cells.iter_mut() {
+		println!("map len {}", self.cellsm.len());
+		//for cell in self.cells.iter_mut() {
+		for (id, cell) in self.cellsm.iter_mut() {
 			println!("calculation cell");
 			if deads.contains(&cell.get_id()) {
 				continue;
@@ -107,22 +121,14 @@ impl Game {
 		println!("Processed {} cells;", x);
 		self.turn += 1;
 
-		//println!("deads: {:?}", deads);
 		let mut count_vec: Vec<(&i32)> = deads.iter().collect();
-		//println!("  vec: {:?}", count_vec);
 		count_vec.sort_by(|a, b| b.cmp(a));
-		//println!(" sort: {:?}", count_vec);
-		/*
-		for x in deads {
-			println!("removing cell with id {}", x - 1);
-			//self.cells.remove(x as usize - 1);
-		}
-		*/
 		println!("deads count: {}", deads.len());
-		println!("cells count: {}", self.cells.len());
+		println!("cells count: {}", self.cellsm.len());
 		for x in count_vec {
 			println!("removing id {}", *x);
-			self.cells.remove(*x as usize - 1);
+			//self.cells.remove(*x as usize - 1);
+			self.cellsm.remove(&(*x - 1));
 		}
 		Ok(())
 	}
@@ -143,7 +149,9 @@ impl Default for Game {
 			map: Map::new(),
 			char: Char::new(),
 			pos: Pos::new(),
-			cells: Vec::new()
+			//cells: Vec::new(),
+			cellsm: HashMap::new(),
+			id_reuse: Vec::new(),
 		}
 	}
 }

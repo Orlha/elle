@@ -111,15 +111,22 @@ impl Map {
 		}
 	}
 	fn check_spot_status(&mut self, pos: Pos, spot: Spot) -> Result<()> {
+		println!("look if we are at bad borders here");
+		let n = self.get_spot_status(pos).unwrap();
 		/*
 		match self.get_spot_status(pos).unwrap() {
 			spot => {
-				println!("{:?}", self.get_spot_status(pos).unwrap());
+				//println!("{:?}", self.get_spot_status(pos).unwrap());
+				println!("still ok!");
 				Ok(())
 			}
-			_ => Err("No valid status on questioned spot;".into()),
+			_ => {
+				println!("invalid as intended!");
+				Err("No valid status on questioned spot;".into())
+			}
 		}
 		*/
+		/*
 		let n = self.get_spot_status(pos).unwrap();
 		println!("spot status: {:?}", n);
 		println!("expc status: {:?}", spot);
@@ -129,6 +136,7 @@ impl Map {
 		} else {
 			return Err("Err".into());
 		}
+		*/
 	}
 	pub fn cell_cell(&self, cell: &mut Cell) {
 	}
