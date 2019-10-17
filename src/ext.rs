@@ -28,6 +28,7 @@ pub enum Direction {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Copy, Clone)]
 pub enum Spot {
 	Empty,
 	Alive,

@@ -48,8 +48,12 @@ impl Map {
 		}
 		Err("Map: couldn't spawn after 10 attempts".into())
 	}
+	pub fn bind_cell_close(&mut self, id: i32, pos: Pos) -> Result<(Pos)> {
+		Ok(Pos::new())
+	}
 	pub fn kill_cell(&mut self, pos: Pos) -> Result<()> {
 		let n = &mut self.data[pos.y as usize][pos.x as usize];
+		println!("trying to kill: {}", n);
 		if *n > 0 {
 			*n *= -1;
 		}
@@ -57,12 +61,9 @@ impl Map {
 	}
 	pub fn check_borders(&self, pos: Pos) -> Result<()> {
 		let y = pos.y;
-		println!("y = {}", y);
 		if (y < 0) | (y >= self.height()) {
-			println!("got bad borders");
 			Err(ERR_BOUNDS.into())
 		} else {
-			println!("got good borders");
 			Ok(())
 		}
 	}
@@ -99,8 +100,6 @@ impl Map {
 			_ => (),
 		}
 
-		println!("will crash right now");
-		println!("npos {}", npos);
 		match self.check_spot_status(npos, Spot::Empty) {
 			Ok(_) => {
 				self.data[pos.y as usize][pos.x as usize] = 0;
@@ -111,32 +110,11 @@ impl Map {
 		}
 	}
 	fn check_spot_status(&mut self, pos: Pos, spot: Spot) -> Result<()> {
-		println!("look if we are at bad borders here");
 		let n = self.get_spot_status(pos).unwrap();
-		/*
-		match self.get_spot_status(pos).unwrap() {
-			spot => {
-				//println!("{:?}", self.get_spot_status(pos).unwrap());
-				println!("still ok!");
-				Ok(())
-			}
-			_ => {
-				println!("invalid as intended!");
-				Err("No valid status on questioned spot;".into())
-			}
+		match n {
+			_ if spot == n => Ok(()),
+			_ => Err("Err".into()),
 		}
-		*/
-		/*
-		let n = self.get_spot_status(pos).unwrap();
-		println!("spot status: {:?}", n);
-		println!("expc status: {:?}", spot);
-		if n == spot {
-			println!("Matched!");
-			return Ok(());
-		} else {
-			return Err("Err".into());
-		}
-		*/
 	}
 	pub fn cell_cell(&self, cell: &mut Cell) {
 	}
@@ -154,47 +132,69 @@ impl Map {
 			pos_west.x = MAP_SIZE as i64 - 1;
 		}
 
-		match self.check_spot_status(pos_north, Spot::Alive) {
-			Ok(_) => {
-				x.push(pos_north);
-				println!("added north");
-			}
-			_ => (),
+		if self.check_spot_status(pos_north, Spot::Alive).is_ok() {
+			x.push(pos_north);
 		}
-		match self.check_spot_status(pos_east, Spot::Alive) {
-			Ok(_) => {
-				x.push(pos_east);
-				println!("added east");
-			}
-			_ => (),
+		if self.check_spot_status(pos_east, Spot::Alive).is_ok() {
+			x.push(pos_east);
 		}
-		match self.check_spot_status(pos_south, Spot::Alive) {
-			Ok(_) => {
-				x.push(pos_south);
-				println!("added south");
-			}
-			_ => (),
+		if self.check_spot_status(pos_south, Spot::Alive).is_ok() {
+			x.push(pos_south);
 		}
-		match self.check_spot_status(pos_west, Spot::Alive) {
-			Ok(_) => {
-				x.push(pos_west);
-				println!("added west");
-			}
-			_ => (),
+		if self.check_spot_status(pos_west, Spot::Alive).is_ok() {
+			x.push(pos_west);
 		}
+
 		if x.len() == 0 {
 			return Ok(0);
 		}
-		println!("cell {} is trying to feast in one of {} directions", id, x.len());
+		// Get random direction to try feast in;
 		let r = get_rand(1).unwrap()[0]  as usize % x.len();
-		println!("crashing pos {}", x[r]);
+		// Read ID of cell we trying to eat;
 		let n = self.data[x[r].y as usize][x[r].x as usize];
-		println!("cell {} is dead", n);
+		// Nulify it (as it was eaten;
 		self.data[x[r].y as usize][x[r].x as usize] = 0;
+		// Return ID of eaten Cell (or 0);
 		Ok(n)
 	}
 	pub fn cell_scavenge(&mut self, id: i32, pos: Pos) -> Result<i32> {
-		Ok(5)
+		let mut x: Vec<Pos> = vec!{};
+		let pos_north = Pos::init(pos.x, pos.y - 1);
+		let mut pos_east  = Pos::init(pos.x + 1, pos.y);
+		let pos_south = Pos::init(pos.x, pos.y + 1);
+		let mut pos_west  = Pos::init(pos.x - 1, pos.y);
+
+		if pos_east.x == MAP_SIZE as i64 {
+			pos_east.x = 0;
+		}
+		if pos_west.x == -1 {
+			pos_west.x = MAP_SIZE as i64 - 1;
+		}
+
+		if self.check_spot_status(pos_north, Spot::Dead).is_ok() {
+			x.push(pos_north);
+		}
+		if self.check_spot_status(pos_east, Spot::Dead).is_ok() {
+			x.push(pos_east);
+		}
+		if self.check_spot_status(pos_south, Spot::Dead).is_ok() {
+			x.push(pos_south);
+		}
+		if self.check_spot_status(pos_west, Spot::Dead).is_ok() {
+			x.push(pos_west);
+		}
+
+		if x.len() == 0 {
+			return Ok(0);
+		}
+		// Get random direction to try feast in;
+		let r = get_rand(1).unwrap()[0]  as usize % x.len();
+		// Read ID of cell we trying to eat;
+		let n = self.data[x[r].y as usize][x[r].x as usize];
+		// Nulify it (as it was eaten;
+		self.data[x[r].y as usize][x[r].x as usize] = 0;
+		// Return ID of eaten Cell (or 0);
+		Ok(n)
 	}
 }
 
@@ -203,7 +203,13 @@ impl fmt::Display for Map {
 		for y in 0..MAP_SIZE {
 			for x in 0..MAP_SIZE {
 				if x == 0 {
-					write!(f, "\t")?;
+					match y {
+						d if (y as i64) < ENERGY_TOP / ENERGY_DROP => {
+							write!(f, "+{:02}|", ENERGY_TOP - ENERGY_DROP * y as i64);
+						}
+						_ => write!(f, "---|")?,
+					}
+					//write!(f, "\t")?;
 				}
 				/*
 				if self.pos.x == x as i64 && self.pos.y == y as i64 {
@@ -215,7 +221,7 @@ impl fmt::Display for Map {
 					0  => write!(f, "{} ", '·')?,
 					d if d < 0 => write!(f, "{} ", 'x')?,
 					d if d > 0 => write!(f, "{} ", '▸')?,
-					_  => write!(f, "{} ", '▸')?,
+					_  => write!(f, "{} ", '-')?,
 					//_ => write!(f, "{} ", self.data[y][x])?,
 				}
 			}

@@ -61,11 +61,17 @@ impl Cell {
 		}
 		Ok(r)
 	}
+	pub fn may_divide(&self) -> bool {
+		if self.energy > 95 {
+			true
+		} else {
+			false
+		}
+	}
 	pub fn gain_energy(&mut self, n: i64) {
 		let energy: &mut i64 = &mut self.energy;
-		if *energy == 0 { self.alive = false; return; }
 		*energy += n;
-		if *energy < 0 {
+		if *energy <= 0 {
 			self.alive = false;
 			*energy = 0;
 			return;
